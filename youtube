@@ -1,0 +1,15 @@
+#!/usr/bin/perl
+
+if ($ARGV[0] =~ /v=([^&]*)/) {
+	$vid = $1;
+} else {
+	$vid = $ARGV[0];
+}
+
+if (!fork) {
+	system('youtube-dl', '-b', '-o', '/home/bucko/.ytcache/'.$vid.'.flv', $vid);
+	exit;
+}
+print "Waiting 3 secs...";
+sleep 3;
+system('mplayer', '-loop', '0', '/home/bucko/.ytcache/'.$vid.'.flv');

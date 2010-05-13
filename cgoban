@@ -1,0 +1,3 @@
+#!/bin/sh
+AWT_TOOLKIT=MToolkit schroot -p -- java -jar ~/Apps/cgoban-h2.jar
+

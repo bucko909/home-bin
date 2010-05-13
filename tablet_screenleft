@@ -1,0 +1,27 @@
+#!/bin/bash
+
+I="$(xsetwacom get stylus Screen_No 2>/dev/null)"
+case $0 in
+	*left)
+		case "$I" in
+		2) J=1
+		;;
+		*) J=0
+		;;
+		esac
+	;;
+	*right)
+		case "$I" in
+		0) J=1
+		;;
+		*) J=2
+		;;
+		esac
+	;;
+	*)
+		J=-1
+	;;
+esac
+
+xsetwacom set stylus Screen_No $J
+xsetwacom set eraser Screen_No $J

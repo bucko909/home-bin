@@ -1,0 +1,6 @@
+if amixer sget Master pvolume|grep -q \\[0%; then
+	amixer -q sset 'Audigy Analog/Digital Output Jack',0 unmute
+	amixer -q sset Master 1%
+else
+	amixer -q sset 'Audigy Analog/Digital Output Jack',0 toggle
+fi

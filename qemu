@@ -1,0 +1,4 @@
+#!/bin/bash
+#QEMU_AUDIO_DRV=alsa QEMU_ALSA_VERBOSE=1 /usr/bin/kvm -no-acpi -m 2000 -usb -usbdevice tablet -soundhw es1370 -net nic -net tap -boot c -hda $1
+QEMU_OSS_DAC_DEV=/dev/dsp QEMU_OSS_ADC_DEV=/dev/dsp QEMU_OSS_DEBUG=1 QEMU_AUDIO_DRV=oss /usr/bin/kvm -no-acpi -vga cirrus -m 2000 -usb -usbdevice tablet -soundhw es1370 -net nic -net tap,ifname=tap0,script=/etc/qemu-ifup -boot c -hda $1
+#QEMU_OSS_DAC_DEV=/dev/dsp QEMU_OSS_ADC_DEV=/dev/dsp QEMU_OSS_DEBUG=1 QEMU_AUDIO_DRV=oss kvm -no-acpi -hda winxp.img -m 384 -usb -usbdevice tablet -soundhw es1370 "$*"

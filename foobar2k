@@ -1,0 +1,87 @@
+#!/bin/bash
+
+cd /home/bucko/Apps/foobar2000
+
+if [ "$1" != "" ]; then
+	i=1
+	files=("$@")
+	file=`echo "z:$1" | sed 's/\\//\\\\/g'`
+	command=${1##*command-}
+fi
+
+if [ "$2" != "" ]; then
+	dir=`echo "z:$2" | sed 's/\\//\\\\/g'`
+fi
+
+case $1 in
+	-add)
+		wine foobar2000.exe /add "$dir"
+		echo "Action: adding Directory or Files \"${dir}\" to foobar2000";; 
+	-addfiles)
+		while [ $i -lt $# ]
+		do
+			wine foobar2000.exe /add "z:${files[$i]}"
+			echo "Action: adding z:${files[$i]}"
+			let "i+=1"
+		done
+		echo "Result: added "$(( ${#}-1 ))" files to foobar2000";;
+	-play)
+		wine foobar2000.exe /play
+		echo "Action: play Song in foobar2000";;
+	-pause)
+		wine foobar2000.exe /pause
+		echo "Action: pause Song in foobar2000";;
+	-playpause)
+		wine foobar2000.exe /playpause
+		echo "Action: play or pause Song in foobar2000";;
+	-prev)
+		wine foobar2000.exe /prev
+		echo "Action: play previous Song in foobar2000";;
+	-next)
+		wine foobar2000.exe /next
+		echo "Action: play next Song in foobar2000";;
+	-rand)
+		wine foobar2000.exe /rand
+		echo "Action: play random Song in foobar2000";;
+	-stop)
+		wine foobar2000.exe /stop
+		echo "Action: stop playing a Song in foobar2000";;
+	-mute)
+		wine foobar2000.exe /command:Volume\ mute
+		echo "Action: mute foobar2000";;
+	-volup)
+		wine foobar2000.exe /command:Volume\ up
+		echo "Action: raise Volume in foobar2000";;
+	-voldown)
+		wine foobar2000.exe /command:Volume\ down
+		echo "Action: decrease Volume in foobar2000";;
+	-hide)
+		wine foobar2000.exe /hide
+		echo "Action: hide foobar2000 window";;
+	-show)
+		wine foobar2000.exe /show
+		echo "Action: show foobar2000 window";;
+	-exit)
+		wine foobar2000.exe /exit
+		echo "Action: exit foobar2000";;
+	-rescan)
+		wine foobar2000.exe /command:"Rescan Media Library"
+		echo "Action: Rescan foobar2000 Media Library";;
+	-command-*)
+		wine foobar2000.exe /command:$command
+		echo "Action: call foobar2000 with command \"$command\"";;
+	-playlist_command-*)
+		wine foobar2000.exe /playlist_command:$command
+		echo "Action: call foobar2000 with playlist command \"$command\"";;
+	-playing_command-*)
+		wine foobar2000.exe /playing_command:$command
+		echo "Action: call foobar2000 with playing command \"$command\"";;
+	-help)
+		echo "Using: foobar2000 [Command]
+
+Where Command can be on of these:
+-add -addfiles -play -pause -playpause -stop -next -prev -rand -mute -volup -voldown -hide -show -rescan -command-[fb2k command] -playlist_command-[fb2k playlist command] -playing_command-[fb2k playing command] -help";;
+	*)
+		wine foobar2000.exe "$file"
+		echo "Action: start foobar2000";;
+esac

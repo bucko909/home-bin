@@ -1,0 +1,7 @@
+#!/bin/sh
+
+/usr/bin/mplayer "$@"
+
+xset dpms 300 600 900
+
+echo foo
