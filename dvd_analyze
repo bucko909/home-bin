@@ -1,0 +1,108 @@
+#!/usr/bin/perl
+
+sub get_dvd_info {
+	my $f = quotemeta $_[0];
+	eval `lsdvd -x -Op "$f"`;
+	\%lsdvd;
+}
+
+# First task is to figure out what episodes we can find on the disc.
+
+sub find_episodes {
+	my ($dvd) = @_;
+
+	# Start by testing chapter lengths for similarities.
+	my $episodes = find_episodes_titles($dvd);
+	return $episodes || find_episodes_chapters($dvd);
+}
+
+# Quadratic in titles, but that's hardly the end of the world.
+sub find_episodes_titles {
+	my ($dvd) = @_;
+	my @length_info;
+
+	for my $track (@{$dvd->{track}}) {
+		# Episodes are >2 mins and <50 mins
+		push @length_info, [$track->{length}, -100] if $track->{length} > 120 && $track->{length} < 3000;
+	}
+	for my $len1 (@length_info) {
+		for my $len2 (@length_info) {
+			$len->[1] += 1/(abs($len->[0] - $track->{length})||0.01);
+		}
+	}
+	@length_info = sort { $b->[1] <=> $a->[1] } @length_info;
+
+	# Would hope to see 2 titles within a few seconds of each other, at least.
+	return unless $length_info[0][1] > 0.3;
+
+	my $best_length = $length_info[0][0];
+
+	my @episodes;
+	for my $track (@{$dvd->{track}}) {
+		if (abs($track->{length} - $best_length) < 10) {
+			push @episodes, [ $track->{ix}, [ 1, scalar @{$track->{chapter}} ] ];
+		}
+	}
+	return \@episodes;
+}
+
+sub find_episodes_chapters {
+	my ($dvd) = @_;
+
+	# Start by finding the longest title.
+	my $longest_track;
+	for my $track (@{$dvd->{track}}) {
+		if (!$longest_track || $track->{length} > $longest_track->{length}) {
+			$longest_track = $track;
+		}
+	}
+
+	# Now try to split it into episodes.
+	my $length = 0;
+	my @candidates;
+	outer: for my $chap_length (1 .. int(@{$longest_track->{chapter}}/2) ) {
+		$length += $longest_track->{chapter}[$chap_length-1];
+
+		# Simply no way there's >15 episodes on a disc.
+		next if $longest_track->{length} / $length > 15;
+		my $num_eps = $longest_track->{length} / $length;
+
+		# Episodes almost never vary in length by this much.
+		next if $num_eps - int($num_eps) > 0.2;
+
+		# OK, this looks like a candidate. Let's check ahead for chapter
+		# boundaries within 10s.
+		my $scanned = $length;
+		my $claimed = 0;
+		my $maybe_claimed = $length;
+		my $score = 0;
+		my @chap_hits;
+		for my $scan ( $chap_length .. $#{$longest_track->{chapter}} ) {
+			$scanned += $longest_track->{chapter}[$scan]
+			if ($scanned > $claimed + 10) {
+				$score += 1/(abs($scanned - $claimed - $length)||0.01);
+				$claimed = $maybe_claimed;
+				push @chap_hits, $scan;
+			}
+			if (abs($scanned - $claimed - $length) < 10) {
+				$maybe_claimed = $scanned;
+				next;
+			}
+			if ($scanned > $claimed + $length + 10) {
+				# Give up
+				next outer;
+			}
+		}
+		$score += 1/(abs($scanned - $claimed - $length)||0.01);
+		$claimed = $maybe_claimed;
+		push @chap_hits, scalar @{$longest_track->{chapter}};
+
+		# It's a pretty good candidate. All we might fear now is that we've
+		# claimed half an episode where the breaks are strongly controlled.
+		push @candidates, [ $chap_length, $score, \@chap_hits ];
+	}
+
+	@candidate = sort { $b->[1] <=> $a->[1] } @candidates;
+	return unless $candidates[0][0] > 0.3;
+
+}

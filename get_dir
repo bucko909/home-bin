@@ -1,0 +1,4 @@
+#!/bin/sh
+
+J="$(readlink /union/all/Anime/"$1"/stub)"
+dirname "$J"

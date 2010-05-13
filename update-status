@@ -1,0 +1,101 @@
+#!/bin/bash
+
+anime="$1"
+shift
+
+dir="$(~/bin/get_dir "$anime")"
+
+if [ "$dir" = "." ]; then
+		echo $0: $anime: Not found.
+else
+	type="$1"
+	shift
+	while [ -n "$type" ]; do
+		name=${type/*=/}
+		remove=
+		create=
+		filter=
+		append=
+		case "$type" in
+			stalled)
+				create=stalled
+				remove=complete
+			;;
+			complete)
+				create=complete
+				remove=stalled
+			;;
+			incomplete)
+				remove=complete\ stalled
+			;;
+			watched=*)
+				filter=watching
+				filter=given_up
+				append=watched
+			;;
+			watching=*)
+				filter=watched
+				filter=given_up
+				append=watching
+			;;
+			given_up=*)
+				filter=watched
+				filter=watching
+				append=given_up
+			;;
+			not_buying)
+				create=not_buying
+				remove=on_dvd
+				remove=wishlist
+			;;
+			wishlist)
+				create=wishlist
+				remove=on_dvd
+				remove=not_buying
+			;;
+			on_dvd)
+				create=on_dvd
+				remove=wishlist
+				remove=not_buying
+			;;
+		esac
+
+		for file in $create; do
+			echo Touch: "$dir"/$file
+			touch "$dir"/$file
+			if [ ! -L ~/union/Anime/"$anime"/$file ]; then
+				echo ln -s "$dir"/$file ~/union/Anime/"$anime"/$file
+			fi
+		done
+
+		for file in $remove; do
+			echo Remove: "$dir"/$file
+			if [ -e "$dir"/$file ]; then
+				rm "$dir"/$file
+			fi
+			#rm ~/union/Anime/"$anime"/$file
+		done
+
+		for file in $filter $append; do
+			echo Filter $name: "$dir"/$file
+			if [ -e "$dir"/$file ]; then
+				sed -i "/$name/d" "$dir"/$file
+				if [ ! -s "$dir"/$file ]; then
+					echo Remove: "$dir"/$file
+					rm "$dir"/$file
+					#rm ~/union/Anime/"$anime"/$file
+				fi
+			fi
+		done
+
+		for file in $append; do
+			echo Append $name: "$dir"/$file
+			echo $name >> "$dir"/$file
+			if [ ! -L ~/union/Anime/"$anime"/$file ]; then
+				echo ln -s "$dir"/$file ~/union/Anime/"$anime"/$file
+			fi
+		done
+		type="$1"
+		shift
+	done
+fi

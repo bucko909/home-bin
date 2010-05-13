@@ -1,0 +1,40 @@
+#!/usr/bin/perl
+
+my $dvd = $ARGV[0];
+
+my @tracks = get_dvd_info($dvd);
+for my $track (@tracks) {
+	# Get the extents
+	print join("; ", map{"$_=$t->{$_}"} keys %$t)."\n";
+}
+
+sub get_dvd_info {
+	my ($dvd) = @_;
+	open PROFILE, "rip_profiles/$dvd";
+	local $/;
+	my $inf = <PROFILE>;
+	close PROFILE;
+	$inf =~ s/\s+/ /s;
+	my @tracks;
+	my %global;
+	my $track;
+	while($inf) {
+		$inf =~ s/^\s+//;
+		if ($inf =~ s/^(\S+)\s*=\s*(?:"((?:[^"]|\\.)*)"|(\S+))//) {
+			if (defined $track) {
+				$tracks[$track]{$1} = $2||$3;
+			} else {
+				$global{$1} = $2||$3;
+			}
+		} elsif ($inf =~ s/^(\S+)://) {
+			$track = @tracks;
+			$tracks[$track] = { %global };
+			$tracks[$track]{_NAME} = $1;
+		} else {
+			last unless $inf;
+			print "Cocks: $inf\n";
+			exit 1;
+		}
+	}
+	@tracks;
+}

@@ -1,0 +1,6 @@
+#!/bin/sh
+
+if [ ~/BW -nt ~/UBW ]; then
+	cp ~/BW ~/UBW
+	sudo /root/capspeed.sh `cat ~/UBW`
+fi

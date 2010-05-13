@@ -1,0 +1,9 @@
+#!/bin/sh
+
+J="$(~/bin/get_dir "$1")"
+if [ "$J" = "." ]; then
+		echo Error.
+else
+		touch "$J"/complete
+		ln -s "$J"/complete ~/union/Anime/"$1"/complete
+fi

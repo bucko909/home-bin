@@ -1,0 +1,9 @@
+#!/bin/sh
+if /usr/bin/screen -ls | /bin/grep -q azureus; then
+	echo "Azureus is already running!" > /dev/null
+else
+  echo "Starting Azureus."
+	. /etc/profile
+	cd /home/media/azureus
+	screen -dmS azureus ./azureus --ui=console
+fi

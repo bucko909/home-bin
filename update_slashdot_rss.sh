@@ -1,0 +1,4 @@
+#!/bin/sh
+wget slashdot.org -O - -q | perl -e 'local $/;$_=<>; while(/<div id="text-[^>]+>[\s\n]*(.*?)<\/div>.*?<a href="([^"]*)" class="more">/sg){my $url="http:$2";my $content=$1; my $clean = $content; $clean =~ s/<[^>]*>//g; $file = $url; $file =~ s/(\d)\/\D.*/$1/; $file =~ s/[^a-zA-Z0-9.-]/_/g; open F, ">sd_mainpage_cache/$file" or die "$! $file"; print F "$content"; close F}'
+wget http://rss.slashdot.org/slashdot/classic -O - -q | perl -e 'use HTML::Entities; local $/;$_=<>; s{<link>([^<]*?)\?from=rss</link>.*?<description>([^<]*?)&lt;p&gt;}{my$all=$&;my$u=$1;my$c=$2;$u=~s/(\d)\/\D.*/$1/;$u=~s/[^a-zA-Z0-9.-]/_/g;if (open F, "sd_mainpage_cache/$u") {my$c2=<F>;my$cq=quotemeta$c;$c2=encode_entities($c2);$all=~s/$cq/$c2/;close F}$all}seg;print' > sdrss_links.xml
+scp sdrss_links.xml codd_rss_up: 2> /dev/null > /dev/null

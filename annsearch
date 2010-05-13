@@ -1,0 +1,2 @@
+#!/bin/bash
+wget -q --user-agent="Opera/9.00 (Windows NT 5.1; U; de)" http://www.google.co.uk/search?q="$1"+site:www.animenewsnetwork.com\&num=100 -O -|perl -ne 'print"$1 $2\n"while(/href="([^"]*)".*?>(.*?)<\/a>/g)'|grep '^http://www.animenewsnetwork.com/encyclopedia/anime\.php?id=[0-9]* '|sed 's/<[^>]*>//g'|sed 's/^.*id=//'
