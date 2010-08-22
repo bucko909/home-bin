@@ -1,8 +1,0 @@
-#!/bin/sh
-export LD_LIBRARY_PATH=/usr/local/cedega-cvs/lib:/usr/local/cedega-cvs/bin:$LD_LIBRARY_PATH
-export PATH=/usr/local/cedega-cvs/bin:$PATH
-export REGAPI=/usr/local/cedega-cvs/bin/regapi
-export WINEDBG=/usr/local/cedega-cvs/bin/winedbg
-export WINELOADER=/usr/local/cedega-cvs/bin/wine
-export WINEPREFIX=$HOME/.wine
-export WINESHELLLINK=/usr/local/cedega-cvs/bin/wineshelllink
