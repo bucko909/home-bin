@@ -1,2 +1,2 @@
 #!/bin/bash
-import -window root /home/bucko/ss-$(date +%s).jpg
+import -window root /home/bucko/ss-$(date +%s).png

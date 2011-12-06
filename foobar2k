@@ -5,15 +5,35 @@ cd /home/bucko/Apps/foobar2000
 if [ "$1" != "" ]; then
 	i=1
 	files=("$@")
-	file=`echo "z:$1" | sed 's/\\//\\\\/g'`
+	file=`echo z:$1 | sed 's/\\//\\\\/g'`
 	command=${1##*command-}
 fi
 
 if [ "$2" != "" ]; then
-	dir=`echo "z:$2" | sed 's/\\//\\\\/g'`
+	dir=`echo z:$2 | sed 's/\\//\\\\/g'`
 fi
 
 case $1 in
+	-nowplaying)
+		A="$(xclip -o -selection c)"
+		wine foobar2000.exe /runcmd-playing=Utilities/Text\ Tools/Copy:\ Filecue 2> /dev/null
+		B="$(xclip -o -selection c)"
+		COUNT=0
+		while [ "$B" = "$A" ]; do
+			sleep 0.5
+			COUNT=$(expr "$COUNT" + 1)
+			if [ "$COUNT" -ge 5 ]; then
+				exit 1
+			fi
+			#wine foobar2000.exe /runcmd-playing=Utilities/Text\ Tools/Copy:\ Filecue 2> /dev/null
+			B="$(xclip -o -selection c)"
+		done
+		echo "$B"
+		echo -n "$A" | xclip -selection c
+		;;
+	-rate)
+		wine foobar2000.exe /runcmd-playing="Tagging/Quick Tagger/Set <RATING> to/$2"
+		;;
 	-add)
 		wine foobar2000.exe /add "$dir"
 		echo "Action: adding Directory or Files \"${dir}\" to foobar2000";; 
