@@ -1,0 +1,113 @@
+#!/bin/bash
+
+. /home/bucko/.bashrc
+
+function random_series() {
+	for I in /smb/cirno/media/Anime/Tags/watching/*; do basename "$I"; done|sort -R|head -n1
+}
+
+function yn() {
+	while true; do
+		read -n 1 input
+		echo
+		case "$input" in
+			n)
+				return 1
+				break
+				;;
+			y | '')
+				return 0
+				break
+				;;
+			*)
+				echo -n "[Yn] "
+				;;
+		esac
+	done
+}
+
+if [ -n "$1" ]; then
+	Next="$1"
+fi
+
+while true; do
+	if [ -z "$Next" ]; then
+		Ser=$(random_series)
+		echo -n "Playing from $Ser; is this OK? [Yn] "
+		if ! yn; then
+			continue
+		fi
+	else
+		Ser="$Next"
+		Next=
+	fi
+	next=$(grep bucko /smb/cirno/media/Anime/"$Ser"/watching|cut -d' ' -f2)
+	next=$(printf %02i "$next")
+	count=$(for I in /smb/cirno/media/Anime/"$Ser"/"$Ser - $next"*; do basename "$I"; done|wc -l)
+	if [ $count == 0 ]; then
+		echo "No episode files; next is meant to be $next."
+	else
+		if [ $count -gt 1 ]; then
+			echo "Multiple episodes found:"
+			idx=0
+			for I in /smb/cirno/media/Anime/"$Ser"/"$Ser - $next"*; do
+				idx=$(expr $idx + 1)
+				echo -n "$idx: "
+				basename "$I"
+			done
+			while read -n 1 idx; do
+				if [ -z "$idx" ]; then
+					echo "Random"
+					idx=$(seq 1 $count|sort -R|head -n 1)
+					break
+				elif [ $idx -le $count -a $idx -ge 1 ]; then
+					break
+				else
+					echo -n "Number please: "
+				fi
+			done
+			f="$(for I in /smb/cirno/media/Anime/"$Ser"/"$Ser - $next"*; do basename "$I"; done|head -n $idx|tail -n 1)"
+		else
+			f="$(for I in /smb/cirno/media/Anime/"$Ser"/"$Ser - $next"*; do basename "$I"; done)"
+		fi
+		mplayer /smb/cirno/media/Anime/"$Ser"/"$f"
+	fi
+	while true; do
+		echo -n "Increment/Give up/Finished/Unwatch? [Igfun] "
+		read -n 1 input
+		echo
+		case "$input" in
+			g)
+				ssh cirno update-status \""$Ser"\" given_up=bucko
+				break
+				;;
+			f)
+				ssh cirno update-status \""$Ser"\" watched=bucko
+				break
+				;;
+			u)
+				ssh cirno update-status \""$Ser"\" not_watched=bucko
+				break
+				;;
+			n)
+				this=$(grep bucko /smb/cirno/media/Anime/"$Ser"/watching|cut -d' ' -f2)
+				next=$(expr $this + 1)
+				(grep -v '^bucko ' /smb/cirno/media/Anime/"$Ser"/watching; echo bucko $next) > /tmp/new_watching
+				dir="$(ssh cirno get_dir \""$Ser"\")"
+				cat /tmp/new_watching | ssh cirno tee /tmp/new_watching
+				ssh cirno mv /tmp/new_watching \""$dir"\"/watching
+				Next="$Ser"
+				break
+				;;
+			i | '' )
+				this=$(grep bucko /smb/cirno/media/Anime/"$Ser"/watching|cut -d' ' -f2)
+				next=$(expr $this + 1)
+				(grep -v '^bucko ' /smb/cirno/media/Anime/"$Ser"/watching; echo bucko $next) > /tmp/new_watching
+				dir="$(ssh cirno get_dir \""$Ser"\")"
+				cat /tmp/new_watching | ssh cirno tee /tmp/new_watching
+				ssh cirno mv /tmp/new_watching \""$dir"\"/watching
+				break
+				;;
+		esac
+	done
+done

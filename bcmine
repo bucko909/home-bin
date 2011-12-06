@@ -1,0 +1,16 @@
+#!/bin/sh
+
+
+#connect=http://:5xPXK3n8GS@localhost:8332/
+connect=http://bucko:haiHee0U@bitcoinpool.com:8334
+sudo iptables -L -v|grep -q 'owner UID match hashkill reject-with icmp-port-unreachable' || sudo iptables -A OUTPUT -m owner --uid-owner hashkill ! -o lo -j REJECT
+chmod 644 ~/.Xauthority
+sudo -u hashkill xauth merge ~bucko/.Xauthority
+chmod 600 ~/.Xauthority
+#cd ~hashkill/dsa/phoenix-1.50
+#sudo -u hashkill DISPLAY=:0 LD_LIBRARY_PATH=/home/bucko/AMD-APP-SDK-v2.4-lnx64/lib/x86_64 $LD_LIBRARY_PATH ./phoenix.py -u $connect -k poclbm DEVICE=0 VECTORS BFI_INT FASTLOOP AGGRESSION=7 WORKSIZE=128 $*
+#sudo -u hashkill DISPLAY=:0 LD_LIBRARY_PATH=/home/bucko/AMD-APP-SDK-v2.4-lnx64/lib/x86_64 $LD_LIBRARY_PATH ./phoenix$1.py -u $connect -k phatk DEVICE=0 VECTORS BFI_INT AGGRESSION=$2 WORKSIZE=128 $*
+cd ~hashkill/pocl
+socat tcp4-listen:9001,fork socks4a:127.0.0.1:46.4.121.119:8332,socksport=9050 &
+sudo -u hashkill DISPLAY=:0 python guiminer.py &
+wait

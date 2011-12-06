@@ -1,0 +1,18 @@
+#!/bin/sh
+
+while true; do
+	nc -U ~/.pwman < /dev/null && break
+	echo -n "Need locker password: " >&2
+	stty -echo
+	if ! read pass; then
+		echo >&2
+		break
+	fi
+	echo >&2
+	if echo "$pass" | gpg -u "David Buckley's Passwords" -o /dev/null --batch --passphrase-fd 0 --sign /dev/null > /dev/null 2> /dev/null; then
+		echo "$pass"
+		echo "$pass" | stringcache > /dev/null 2> /dev/null &
+		break
+	fi
+done
+stty echo

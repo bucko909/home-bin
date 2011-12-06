@@ -1,0 +1,47 @@
+#!/bin/sh
+
+umask 077
+
+key="$1"
+
+if [ -e ~/.pwcache/"$key".user ]; then
+	echo "Found password"
+	pw=$(getpwmanpass)
+	user="$(echo "$pw" | gpg -a -d -u "David Buckley's Passwords" --passphrase-fd 0 --batch ~/.pwcache/"$key".user 2> /dev/null)"
+	pass="$(echo "$pw" | gpg -a -d -u "David Buckley's Passwords" --passphrase-fd 0 --batch ~/.pwcache/"$key".pass 2> /dev/null)"
+	xclip -o > /tmp/oldclip
+	#echo -n "$user" | xclip -i
+	#echo "Username now on clipboard"
+	#read -t 10
+	echo "Username going on clipboard"
+	echo -n "$user" | xclip -i -quiet -l 1
+	echo "Password going on clipboard"
+	echo -n "$pass" | xclip -i -quiet -l 1
+	xclip -i < /tmp/oldclip
+	rm /tmp/oldclip
+	echo "Clipboard restored"
+elif [ -e ~/.pwcache/"$key".seckey ]; then
+	echo "Old style password cache"
+	gpg -a -d ~/.pwcache/"$key".seckey 2> /dev/null | while read key pass; do
+		xclip -o > /tmp/oldclip
+		if [ "${key#display_}" == "$key" ]; then
+			echo "Putting $key" on the clipboard
+			echo -n "$pass" | xclip -i -quiet -l 1
+			xclip -i < /tmp/oldclip
+			rm /tmp/oldclip
+		else
+			echo "${key#display_} is $pass"
+		fi
+	done
+	echo "Done."
+else
+	echo "Key doesn't exist."
+	echo -n "Username: "
+	read username
+	echo -n "Password: "
+	read password
+	echo "$username" | gpg -a -e -r "David Buckley's Passwords" - > ~/.pwcache/"$key".user
+	echo "$password" | gpg -a -e -r "David Buckley's Passwords" - > ~/.pwcache/"$key".pass
+	echo "Done."
+fi
+

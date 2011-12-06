@@ -1,0 +1,14 @@
+#!/bin/sh
+
+tohost="$1"
+shift
+name="ass:$HOSTNAME:$PPID:$tohost"
+
+MATCH="$(grep -aoh ass:$HOSTNAME:[^:]*:$tohost /proc/[0-9]*/cmdline|perl -ne'chomp;$a{$_}=1;END{print join("\\\|",keys%a)}')"
+if [ -n "$MATCH" ]; then
+	ssh $tohost screen -ls '|' grep -o "[0-9]*\.ass:$HOSTNAME:[^:]*:$tohost" '|' grep -v \'"$MATCH"\' | cut -d. -f1 | xargs kill 2> /dev/null
+else
+	ssh $tohost screen -ls '|' grep -o "[0-9]*\.ass:$HOSTNAME:[^:]*:$tohost" | cut -d. -f1 | xargs kill 2> /dev/null
+fi
+
+exec autossh $tohost -t -- screen -r -d "$name" '||' screen -e '\\0377\\0377' -S "$name"

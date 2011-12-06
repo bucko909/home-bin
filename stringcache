@@ -1,0 +1,18 @@
+#!/usr/bin/python
+import socket
+import os
+import sys
+
+s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+try:
+	os.remove("/home/bucko/.pwman")
+except OSError:
+	pass
+s.bind("/home/bucko/.pwman")
+s.listen(1)
+s.settimeout(3600)
+data = sys.stdin.readline()
+while True:
+	conn, addr = s.accept()
+	conn.send(data)
+	conn.close()
