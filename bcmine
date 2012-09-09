@@ -12,5 +12,5 @@ chmod 600 ~/.Xauthority
 #sudo -u hashkill DISPLAY=:0 LD_LIBRARY_PATH=/home/bucko/AMD-APP-SDK-v2.4-lnx64/lib/x86_64 $LD_LIBRARY_PATH ./phoenix$1.py -u $connect -k phatk DEVICE=0 VECTORS BFI_INT AGGRESSION=$2 WORKSIZE=128 $*
 cd ~hashkill/pocl
 socat tcp4-listen:9001,fork socks4a:127.0.0.1:46.4.121.119:8332,socksport=9050 &
-sudo -u hashkill DISPLAY=:0 python guiminer.py &
+sudo -u hashkill DISPLAY=:0 XDG_SESSION_COOKIE="$XDG_SESSION_COOKIE" python guiminer.py &
 wait
