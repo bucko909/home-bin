@@ -7,5 +7,5 @@ if [ -n "$B" ]; then
 		echo -n "$1|";
 		echo "$B"
 	) >> ~/foo_ratings
-	echo naughty.notify\({timeout=15,\ title=\'Mounted\', text=\'"Stored $B"\'}\) | awesome-client - 2> /dev/null > /dev/null
+	echo naughty.notify\({timeout=15,\ title=\'Rated\', text=\'"Stored $B"\'}\) | awesome-client - 2> /dev/null > /dev/null
 fi
