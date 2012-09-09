@@ -1,0 +1,11 @@
+#!/bin/sh
+audtool current-song > /tmp/song
+B="$(cat /tmp/song)"
+if [ -n "$B" ]; then
+	(
+		echo -n "$(date +%s)|";
+		echo -n "$1|";
+		echo "$B"
+	) >> ~/foo_ratings
+	echo naughty.notify\({timeout=15,\ title=\'Mounted\', text=\'"Stored $B"\'}\) | awesome-client - 2> /dev/null > /dev/null
+fi
